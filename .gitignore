@@ -1,0 +1,10 @@
+.idea
+**.png
+**.jpg
+**.csv
+**.pkl
+**.txt
+**.MP4
+/unused/*
+/__pycache__/*
+!requirements.txt
