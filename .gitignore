@@ -1,10 +1,9 @@
 .idea
-**.png
-**.jpg
 **.csv
 **.pkl
 **.txt
-**.MP4
+**.mp4
 /unused/*
+/results_figures_data/*
 /__pycache__/*
 !requirements.txt
