@@ -1,5 +1,6 @@
 """ Generate plots of results """
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.style as style
 import matplotlib
@@ -26,6 +27,34 @@ def ap_plot(df_results: pd.DataFrame):
         plt.ylabel("Average Precision (AP)")
         plt.legend(loc="upper right")
         fig.savefig('all_MAP.png')  # all means generating pred for range of IoU thresholds + confidence thresholds
+    except Exception as ex:
+        print("Error in generating 'IoU threshold vs. AP/mAP' plot: {}".format(ex))
+
+
+def hypothetical_ap_plot():
+    """
+    Generates IoU threshold vs. AP/mAP plot, hypothetical. Where corn AP is high, weed AP is subpar, but mAP is high.
+    Parameters
+    """
+    try:
+        x = np.linspace(-4, 4, 100)
+        z1 = 0.75 - 0.75 / (1 + np.exp(-1.20 * x))
+        z2 = 0.95 - 0.94 / (1.08 + np.exp(-1.5 * x))
+        z3 = (z1 + z2)/2
+
+        fig = plt.figure()
+        plt.title("Average Precision in Test Set - Hypothetical", fontsize=15, weight='bold')
+        plt.scatter(np.linspace(0, 1, 100), z1, c="tomato", label='Weed, AP',
+                    edgecolors="#2D2926")
+        plt.scatter(np.linspace(0, 1, 100), z2, c="dodgerblue", label='Corn, AP',
+                    edgecolors="#2D2926")
+        plt.scatter(np.linspace(0, 1, 100), z3, c="mediumseagreen", label='mAP, across both classes',
+                    edgecolors="#2D2926")
+        plt.yticks(np.arange(0, 1.1, 0.1))
+        plt.xlabel("IoU Threshold")
+        plt.ylabel("Average Precision (AP)")
+        plt.legend(loc="upper right")
+        fig.savefig('all_MAP_hypothetical.png')  # all means generating pred for range of IoU thresholds + confidence
     except Exception as ex:
         print("Error in generating 'IoU threshold vs. AP/mAP' plot: {}".format(ex))
 
