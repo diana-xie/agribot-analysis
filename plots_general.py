@@ -27,6 +27,9 @@ def ap_plot(df_results: pd.DataFrame):
         plt.ylabel("Average Precision (AP)")
         plt.legend(loc="upper right")
         fig.savefig('all_MAP.png')  # all means generating pred for range of IoU thresholds + confidence thresholds
+
+        df_results[['iou_threshold', 'ap_weed', 'ap_corn', 'm_ap']].describe().to_csv('df_results - describe.csv')
+
     except Exception as ex:
         print("Error in generating 'IoU threshold vs. AP/mAP' plot: {}".format(ex))
 
@@ -55,6 +58,13 @@ def hypothetical_ap_plot():
         plt.ylabel("Average Precision (AP)")
         plt.legend(loc="upper right")
         fig.savefig('all_MAP_hypothetical.png')  # all means generating pred for range of IoU thresholds + confidence
+
+        df_hypothetical = pd.DataFrame(list(zip(np.arange(0, 1.1, 0.01), z1, z2, z3)),
+                                       columns=['iou_threshold', 'ap_weed', 'ap_corn', 'm_ap'])
+        df_hypothetical.describe().to_csv('df_hypothetical - describe.csv')
+
+        return df_hypothetical
+
     except Exception as ex:
         print("Error in generating 'IoU threshold vs. AP/mAP' plot: {}".format(ex))
 

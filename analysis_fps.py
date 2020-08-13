@@ -1,25 +1,26 @@
 import os
 import re
-import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import cv2
 import itertools
+import matplotlib.pyplot as plt
+import matplotlib.style as style
+import matplotlib
+matplotlib.rcParams['font.family'] = 'Franklin Gothic Book'
+style.use('ggplot')
 
-# files = [f for f in os.listdir('fps') if f.endswith('.txt')]
 
-# for FILENAME in files:
-
-FILENAME_TEXT = 'result_2019_07_24_1_Up_Crash-480x480.txt'
+FILENAME_TEXT = 'results_fps/result_2019_07_24_1_Up_Crash-480x480.txt'
 FILENAME_VIDEO = '2019_07_24_1_Up_Crash.MP4'
-FILENAME_WEEDS = 'weed_frames.csv'
+FILENAME_WEEDS = 'results_fps/weed_frames.csv'
 TIME_WITHIN_WEED = 3
 
 
 # get text data
 def extract_data(filename_text: str, filename_weeds: str):
     # open FPS text file
-    f = open('fps/' + filename_text, "r")
+    f = open( filename_text, "r")
     text = f.read()
     # open weed placement file - which was manually generated
     df_weeds = pd.read_csv(filename_weeds)
@@ -53,7 +54,8 @@ def get_fps(text: str):
     df_fps['fps'] = re.compile(r'\nFPS:(\d+\.\d+)').findall(text)  # fps
     df_fps = df_fps.astype(float)  # convert to float
     df_fps = df_fps[df_fps['fps'] != 0]  # remove invalid entries
-    df_fps.rename(columns={'index': 'idx'}, inplace=True)
+    df_fps['idx'] = list(range(1, len(df_fps)+1))  # give FPS number
+    # df_fps.rename(columns={'index': 'idx'}, inplace=True)
     return df_fps
 
 
@@ -115,31 +117,47 @@ def compute_withinweed():
     return frames_to_weed_all
 
 
-def plot_fps():
+def plot_fps(df_fps: pd.DataFrame):
     # plot FPS, analysis
     fig = plt.figure()
-    plt.title("FPS in '{}'".format(FILENAME_VIDEO))
-    plt.plot(df_fps['idx'], df_fps['avg_fps'], "-b", label='FPS (mean)')
-    plt.plot(df_fps['idx'], df_fps['fps'], "-r", label='FPS (raw)')
-    plt.plot(df_fps['idx'], df_fps['cummean_raw'], "-o", label='FPS, cumulative mean (raw)')
-    plt.plot(df_fps['idx'], df_fps['cummean_filtered'], "-p", label='FPS, cumulative mean (after warmup phase)')
+    # plt.title("FPS in '{}'".format(FILENAME_VIDEO))
+    plt.title("FPS in Test Video")
+    # plt.plot(df_fps['idx'], df_fps['avg_fps'], "-b", label='FPS (mean)')
+    plt.plot(
+        df_fps['idx'], df_fps['fps'],
+        color='burlywood',
+        label='FPS (raw)'
+    )
+    plt.plot(
+        df_fps['idx'], df_fps['cummean_raw'],
+        color='darkorange',
+        label='FPS, cumulative mean'  # (raw)'
+    )
+    # plt.plot(
+    #     df_fps['idx'], df_fps['cummean_filtered'],
+    #     color='darkorange',
+    #     label='FPS, cumulative mean (after warmup phase)'
+    # )
     plt.xlabel("frame #")
-    plt.ylabel("FPS or average FPS")
+    plt.ylabel("Frames per second (FPS)")
     plt.legend(loc="lower right")
-    fig.savefig('FPS_analysis_{}.png'.format(FILENAME_VIDEO))
+    fig.savefig('results_fps/FPS_analysis_{}.png'.format(FILENAME_VIDEO))
 
 
-text, df_weeds = extract_data(FILENAME_TEXT, FILENAME_WEEDS)
-fps, frame_count, duration = get_videoinfo(FILENAME_VIDEO)
-df_fps = get_fps(text)
-df_confidence = get_confidence(text)
-df_fps = compute_fpsfeat(df_fps)
-frames_to_weed_all = compute_withinweed()
+if __name__ == "__main__":
 
-df = df_confidence[df_confidence['frame_num'].isin(frames_to_weed_all)]
-df = df[df['class'] == 'weed']
+    text, df_weeds = extract_data(FILENAME_TEXT, FILENAME_WEEDS)
+    fps, frame_count, duration = get_videoinfo(FILENAME_VIDEO)
+    df_fps = get_fps(text)
+    df_confidence = get_confidence(text)
+    df_fps = compute_fpsfeat(df_fps)
+    plot_fps(df_fps=df_fps)
+    frames_to_weed_all = compute_withinweed()
 
-df['frame_dist'] = df['frame_num'] - (df['arrive_at_weed'] * df['frame_num'])
-test = df['frame_dist'].bfill()
+    # df = df_confidence[df_confidence['frame_num'].isin(frames_to_weed_all)]
+    # df = df[df['class'] == 'weed']
 
+    # df['frame_dist'] = df['frame_num'] - (df['arrive_at_weed'] * df['frame_num'])
+    # test = df['frame_dist'].bfill()
 
+    plot_fps()

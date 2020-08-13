@@ -63,8 +63,10 @@ def analysis_gain_map(
     df_best_map = best_gain_map(gains=gains)  # get best results for map-max condition
     df_best_map_avg = best_gain_map_avg(gains=gains)
 
-    return df_best_gain,\
-           df_best_map, df_best_map_avg
+    # get data scenario yielding best weed AP
+    df = gains_all[gains_all['ap_weed'] == gains_all['ap_weed'].max()]
+
+    return df_best_gain, df_best_map, df_best_map_avg
 
 
 # using fixed gains, compare gain-max vs. map-max gain-types
@@ -80,6 +82,10 @@ def plot_analyze_gains(
         gain_tp_weed=gain_tp_weed,
         gain_fp_weed=gain_fp_weed
     )
+
+    # get df of rows only with the best-mAP
+    df = gains_all[gains_all['m_ap'] == gains_all['m_ap'].max()]
+    df['gain_score'].describe().to_csv('best_map-describe.csv')
 
     # plot - gain-max vs. map-max - which one gives you the better gain?
     plot_gains_map(
@@ -106,18 +112,14 @@ if __name__ == "__main__":
     df_results, gains_all, gains_best = extract_process_data(file_dir='results_iou_conf')
     gains_all.to_pickle('gains_all.pkl')  # save
 
-    # get df of rows only with the best-mAP
-    df = gains_all[gains_all['m_ap'] == gains_all['m_ap'].max()]
-    df['gain_score'].describe()
-
     # make hypothetical weed-corn AP/mAP fig
-    hypothetical_ap_plot()
+    df_hypothetical = hypothetical_ap_plot()
 
     # plots - general analyses
     plot_general(
         df_results=df_results,
         df_gains=gains_all,
-        close_plots=False
+        close_plots=True
     )
 
     # plots - gains & mAP analyses
