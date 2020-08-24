@@ -64,7 +64,15 @@ def analysis_gain_map(
     df_best_map_avg = best_gain_map_avg(gains=gains)
 
     # get data scenario yielding best weed AP
-    df = gains_all[gains_all['ap_weed'] == gains_all['ap_weed'].max()]
+    # df = gains_all[gains_all['ap_weed'] == gains_all['ap_weed'].max()]
+
+    # get difference between gain-gain and gain-map conditions, for total gain
+    # df = df_best_gain.merge(
+    #     df_best_map_avg.rename(columns={'gain_score': 'gain_score_mapmax'}),
+    #     on='iou_threshold',
+    #     how='left'
+    # )
+    # total_gain_difference = df['gain_score'] - df['gain_score_mapmax']
 
     return df_best_gain, df_best_map, df_best_map_avg
 
